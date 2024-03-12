@@ -1,0 +1,34 @@
+@page "/uploadsurvey"
+@page "/"
+@page "/index"
+@layout NoNavLayout
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>Upload Price Survey</h1>
+            <InputFile OnChange="HandleFileUpload" accept=".csv" class="form-control" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        var maxSizeInBytes = 1048576; // 1MB
+        if (file.Size > maxSizeInBytes)
+        {
+            // TODO: Display notification that file size is too large.
+            return;
+        }
+
+        var filePath = Path.Combine("uploads", file.Name);
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.OpenReadStream().CopyToAsync(stream);
+        }
+        // Perform any additional processing or validation
+    }
+}
