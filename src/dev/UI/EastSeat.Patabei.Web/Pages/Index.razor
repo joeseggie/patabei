@@ -3,32 +3,45 @@
 @page "/index"
 @layout NoNavLayout
 
+@inject IEnvironmentVariableService IEnvironmentVariableService
+
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <h1>Upload Price Survey</h1>
+            <h1>Upload Price Survey @MaxSizeInBytes</h1>
             <InputFile OnChange="HandleFileUpload" accept=".csv" class="form-control" />
         </div>
     </div>
 </div>
 
 @code {
+    private uint MaxSizeInBytes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var configMaxSizeInBytes = IEnvironmentVariableService.GetEnvironmentVariable(
+            "PATABEI_FILE_UPLOADS_PRICE_SURVEY_MAXSIZEINBYTES");        
+        MaxSizeInBytes = uint.Parse(configMaxSizeInBytes.ValueOr("0"));
+    }
+
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;
+        if (file is null)
+        {
+            // TODO: Display notification that no file was selected.
+            return;
+        }
 
-        var maxSizeInBytes = 1048576; // 1MB
+        // TODO: Move price survey file max size in byte (1MB) setting to configuration file.
+        var maxSizeInBytes = 1048576;
         if (file.Size > maxSizeInBytes)
         {
             // TODO: Display notification that file size is too large.
             return;
         }
 
-        var filePath = Path.Combine("uploads", file.Name);
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.OpenReadStream().CopyToAsync(stream);
-        }
-        // Perform any additional processing or validation
+        await using var stream = file.OpenReadStream();
+        await file.OpenReadStream().CopyToAsync(stream);
     }
 }

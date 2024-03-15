@@ -10,4 +10,8 @@
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\EastSeat.Patabei.Application\EastSeat.Patabei.Application.csproj" />
+  </ItemGroup>
+
 </Project>
